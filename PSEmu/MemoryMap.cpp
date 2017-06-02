@@ -54,6 +54,16 @@ uint8_t const* MemoryMap::write_single_range(uint32_t map_start, uint32_t write_
 	return input_data + (write_end-write_begin);
 }
 
+uint8_t const * MemoryMap::read_single_range(uint32_t map_start, uint32_t write_begin, uint32_t write_end, uint8_t * input_data)
+{
+	std::shared_ptr<MemoryDevice> device;
+	uint32_t mapBaseAddress, mapSize, deviceOffset, flags;
+	std::tie(device, mapBaseAddress, mapSize, deviceOffset, flags) = maps[map_start];
+
+	device->Read(write_begin - map_start + deviceOffset, write_end - write_begin, input_data);
+	return input_data + (write_end - write_begin);
+}
+
 template<typename Iterator>
 void MemoryMap::store_in_ranges(Iterator begin,Iterator end, uint32_t address_begin, uint32_t address_end, uint8_t const * data) {
 	auto src_ptr = data;
@@ -75,10 +85,59 @@ void MemoryMap::store_in_ranges(Iterator begin,Iterator end, uint32_t address_be
 	}
 }
 
+template<typename T>
+T MemoryMap::read(uint32_t address)
+{
+	T out;
+	read(address, sizeof(T), &out);
+	return out;
+}
+
+template<typename Iterator>
+void MemoryMap::read_in_ranges(Iterator begin, Iterator end, uint32_t address_begin, uint32_t address_end, uint8_t * data)
+{
+	auto src_ptr = data;
+	auto end_ptr = data + (address_end - address_begin);
+	for (auto it = begin; it != end; it++) {
+		std::pair<uint32_t, uint32_t> i = *it;
+		if (address_begin < i.first) {
+			// TODO: handle page fault
+			return;
+		}
+		auto write_end = std::min(i.second, address_end);
+		src_ptr = read_single_range(i.first, address_begin, write_end, src_ptr);
+		address_begin = write_end;
+	}
+	if (address_begin != address_end)
+	{
+		// TODO: handle page fault
+		return;
+	}
+}
+
 void MemoryMap::store(uint32_t start_address, uint32_t size, uint8_t const * data)
 {
 	auto range = find_maps_for_range(start_address, start_address + size);
 	store_in_ranges(range.begin(), range.end(), start_address, start_address + size, data);
+}
+
+uint8_t MemoryMap::read8(uint32_t address)
+{
+	return read<uint8_t>(address);
+}
+
+uint16_t MemoryMap::read16(uint32_t address)
+{
+	return read<uint16_t>(address);
+}
+
+uint32_t MemoryMap::read32(uint32_t address)
+{
+	return read<uint32_t>(address);
+}
+
+void MemoryMap::read(uint32_t start_address, uint32_t size, uint8_t * out_data)
+{
 }
 
 bool MemoryMap::add_map(map_type const &map)
