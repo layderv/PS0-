@@ -1,0 +1,43 @@
+#pragma once
+
+#include <initializer_list>
+#include <tuple>
+#include <cstdint>
+#include <memory>
+#include <map>
+#include <unordered_map>
+
+class MemoryDevice;
+class MemoryMap
+{
+	using map_type = std::tuple<std::shared_ptr<MemoryDevice>, uint32_t, uint32_t, uint32_t, uint32_t>;
+	std::unordered_map<uint32_t, map_type> maps;
+	std::map<uint32_t, uint32_t> markers;
+	std::vector<std::pair<uint32_t, uint32_t>> find_maps_for_range(uint32_t begin,uint32_t end);
+	uint8_t const* write_single_range(uint32_t map_start, uint32_t write_begin, uint32_t write_end, uint8_t const *input_data);
+
+public:
+	void store8(uint32_t address, uint8_t data);
+	void store16(uint32_t address, uint16_t data);
+	void store32(uint32_t address, uint32_t data);
+	void store(uint32_t start_address, uint32_t size, uint8_t const * data);
+	bool add_map(
+		std::shared_ptr<MemoryDevice> device,
+		uint32_t mapBaseAddress,
+		uint32_t mapSize,
+		uint32_t deviceOffset,
+		uint32_t flags
+	) {
+		return add_map(std::tie(device, mapBaseAddress, mapSize, deviceOffset, flags));
+	}
+	bool add_map(map_type const & map);
+	bool remove_map(uint32_t mapBaseAddress);
+	MemoryMap(std::initializer_list < map_type > init_list);
+	~MemoryMap();
+private:
+	template<typename T>
+	void store(uint32_t address, T const & data);
+	template<typename Iterator>
+	void store_in_ranges(Iterator begin, Iterator end, uint32_t address_begin, uint32_t address_end, uint8_t const * data);
+};
+
