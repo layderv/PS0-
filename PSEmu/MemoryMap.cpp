@@ -27,7 +27,7 @@ std::vector<std::pair<uint32_t,uint32_t>> MemoryMap::find_maps_for_range(uint32_
 template<typename T>
 void MemoryMap::store(uint32_t address, T const & data)
 {
-	store(address,sizeof(T),reinterpret_cast<uint8_t*>(&data))
+	store(address, sizeof(T), reinterpret_cast<uint8_t const *>(&data));
 }
 
 void MemoryMap::store8(uint32_t address, uint8_t data)
@@ -58,8 +58,8 @@ template<typename Iterator>
 void MemoryMap::store_in_ranges(Iterator begin,Iterator end, uint32_t address_begin, uint32_t address_end, uint8_t const * data) {
 	auto src_ptr = data;
 	auto end_ptr = data + (address_end - address_begin);
-	for (auto i = begin; i != end; i++) {
-		std::pair<uint32_t, uint32_t> i = *i;
+	for (auto it = begin; it != end; it++) {
+		std::pair<uint32_t, uint32_t> i = *it;
 		if (address_begin < i.first) {
 			// TODO: handle page fault
 			return;
