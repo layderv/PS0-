@@ -2,7 +2,8 @@
 
 
 Cpu::Cpu(std::shared_ptr<MemoryMap> baseMemory, std::unique_ptr<Coprocessor>&& cop0, std::unique_ptr<Coprocessor>&& cop1, std::unique_ptr<Coprocessor>&& cop2, std::unique_ptr<Coprocessor>&& cop3)
-	:memory(baseMemory), coprocessors{ std::move(cop0),std::move(cop1),std::move(cop2),std::move(cop3) }
+	:coprocessors{ { std::move(cop0),std::move(cop1),std::move(cop2),std::move(cop3) } }
+	, memory(baseMemory)
 {
 }
 
@@ -70,13 +71,17 @@ void Cpu::Clock()
 		// Loads
 		////////////
 	case 0x20: //lb
+	{
 		auto val = memory->read8(registers[param1] + imm16);
 		reinterpret_cast<int32_t&>(registers[param2]) = reinterpret_cast<int8_t&>(val);
 		break;
+	}
 	case 0x21: //lh
+	{
 		auto val = memory->read16(registers[param1] + imm16);
 		reinterpret_cast<int32_t&>(registers[param2]) = reinterpret_cast<int16_t&>(val);
 		break;
+	}
 	case 0x23: //lw
 		registers[param2] = memory->read32(registers[param1] + imm16);
 		break;
@@ -87,21 +92,23 @@ void Cpu::Clock()
 		registers[param2] = memory->read16(registers[param1] + imm16);
 		break;
 	case 0x22: //lwl
+	{
 		uint32_t addr = (registers[param1] + imm16) / 4;
 		uint32_t left = (registers[param1] + imm16) % 4;
 		uint8_t *reg = reinterpret_cast<uint8_t*>(&registers[param2]);
 		// load left(upper) bytes of reg
 		memory->read(addr * 4, 1 + left, reg + (3 - left));
 		break;
-
+	}
 	case 0x26: //lwr
+	{
 		uint32_t addr = (registers[param1] + imm16) / 4;
 		uint32_t left = (registers[param1] + imm16) % 4;
 		uint8_t *reg = reinterpret_cast<uint8_t*>(&registers[param2]);
 		// load right(lower) bytes of reg
 		memory->read(addr * 4 + left, 4 - left, reg);
 		break;
-
+	}
 		////////////
 		// Stores
 		////////////
@@ -116,36 +123,41 @@ void Cpu::Clock()
 		memory->store32(registers[param1] + imm16, registers[param2]);
 		break;
 	case 0x2a: //swl
+	{
 		uint32_t addr = (registers[param1] + imm16) / 4;
 		uint32_t left = (registers[param1] + imm16) % 4;
 		uint8_t *reg = reinterpret_cast<uint8_t*>(&registers[param2]);
 		// store left(upper) bytes of reg
 		memory->store(addr * 4, 1 + left, reg + (3 - left));
 		break;
+	}
 	case 0x2e: //swr
+	{
 		uint32_t addr = (registers[param1] + imm16) / 4;
 		uint32_t left = (registers[param1] + imm16) % 4;
 		uint8_t *reg = reinterpret_cast<uint8_t*>(&registers[param2]);
 		// store right(lower) bytes of reg
 		memory->store(addr * 4 + left, 4 - left, reg);
 		break;
+	}
 
 		////////////
 		//Arithmetic
 		////////////
 
 	case 0x08: //addi
+	{
 		int64_t result = static_cast<int64_t> (registers[param1]) + reinterpret_cast<int16_t const&>(imm16);
 		if (!check_overflow(result))
 			registers[param2] = static_cast<uint32_t> (result);
 		break;
-		// rs rt
+	}
 	case 0x09: //addiu
-		// rs rt
+	{
 		int64_t result = static_cast<int64_t> (registers[param1]) + +reinterpret_cast<int16_t const&>(imm16);
 		registers[param2] = static_cast<uint32_t> (result);
 		break;
-
+	}
 		////////////]
 		//Jumps
 		////////////
@@ -211,24 +223,31 @@ void Cpu::Clock()
 			////////////
 
 		case 0x20: //add
+		{
 			int64_t result = static_cast<int64_t> (registers[param1]) + static_cast<int64_t> (registers[param2]);
 			if (!check_overflow(result))
 				registers[param3] = static_cast<uint32_t>(result);
 			break;
+		}
 		case 0x21: //addu
+		{
 			int64_t result = static_cast<int64_t> (registers[param1]) + static_cast<int64_t> (registers[param2]);
 			registers[param3] = static_cast<uint32_t>(result);
 			break;
+		}
 		case 0x22: //sub
+		{
 			int64_t result = static_cast<int64_t> (registers[param1]) - static_cast<int64_t> (registers[param2]);
 			if (!check_overflow(result))
 				registers[param3] = static_cast<uint32_t>(result);
 			break;
+		}
 		case 0x23: //subu
+		{
 			int64_t result = static_cast<int64_t> (registers[param1]) - static_cast<int64_t> (registers[param2]);
 			registers[param3] = static_cast<uint32_t>(result);
 			break;
-
+		}
 			////////////
 			//Special Jumps
 			////////////
@@ -258,6 +277,7 @@ void Cpu::Clock()
 
 Coprocessor & Cpu::GetCoprocessor(int copNumber)
 {
+	return *coprocessors[copNumber];
 	// TODO: insert return statement here
 }
 

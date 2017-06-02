@@ -54,7 +54,7 @@ uint8_t const* MemoryMap::write_single_range(uint32_t map_start, uint32_t write_
 	return input_data + (write_end-write_begin);
 }
 
-uint8_t const * MemoryMap::read_single_range(uint32_t map_start, uint32_t write_begin, uint32_t write_end, uint8_t * input_data)
+uint8_t * MemoryMap::read_single_range(uint32_t map_start, uint32_t write_begin, uint32_t write_end, uint8_t * input_data)
 {
 	std::shared_ptr<MemoryDevice> device;
 	uint32_t mapBaseAddress, mapSize, deviceOffset, flags;
@@ -67,7 +67,6 @@ uint8_t const * MemoryMap::read_single_range(uint32_t map_start, uint32_t write_
 template<typename Iterator>
 void MemoryMap::store_in_ranges(Iterator begin,Iterator end, uint32_t address_begin, uint32_t address_end, uint8_t const * data) {
 	auto src_ptr = data;
-	auto end_ptr = data + (address_end - address_begin);
 	for (auto it = begin; it != end; it++) {
 		std::pair<uint32_t, uint32_t> i = *it;
 		if (address_begin < i.first) {
@@ -89,7 +88,7 @@ template<typename T>
 T MemoryMap::read(uint32_t address)
 {
 	T out;
-	read(address, sizeof(T), &out);
+	read(address, sizeof(T), reinterpret_cast<uint8_t*>(&out));
 	return out;
 }
 
@@ -97,7 +96,6 @@ template<typename Iterator>
 void MemoryMap::read_in_ranges(Iterator begin, Iterator end, uint32_t address_begin, uint32_t address_end, uint8_t * data)
 {
 	auto src_ptr = data;
-	auto end_ptr = data + (address_end - address_begin);
 	for (auto it = begin; it != end; it++) {
 		std::pair<uint32_t, uint32_t> i = *it;
 		if (address_begin < i.first) {

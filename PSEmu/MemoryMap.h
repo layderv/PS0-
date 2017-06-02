@@ -7,7 +7,7 @@
 #include <map>
 #include <unordered_map>
 
-template<typename D, typename W> D endian_change(D buf) {
+template<typename D, typename W> void endian_change(D& buf) {
 	union {
 		W word[2];
 		D dword;
@@ -16,7 +16,7 @@ template<typename D, typename W> D endian_change(D buf) {
 	dw.word[0] ^= dw.word[1];
 	dw.word[1] ^= dw.word[0];
 	dw.word[0] ^= dw.word[1];
-	return dw.dword;
+	buf=dw.dword;
 }
 
 class MemoryDevice;
@@ -27,7 +27,7 @@ class MemoryMap
 	std::map<uint32_t, uint32_t> markers;
 	std::vector<std::pair<uint32_t, uint32_t>> find_maps_for_range(uint32_t begin,uint32_t end);
 	uint8_t const* write_single_range(uint32_t map_start, uint32_t write_begin, uint32_t write_end, uint8_t const *input_data);
-	uint8_t const* read_single_range(uint32_t map_start, uint32_t write_begin, uint32_t write_end, uint8_t * input_data);
+	uint8_t * read_single_range(uint32_t map_start, uint32_t write_begin, uint32_t write_end, uint8_t * input_data);
 
 	template<typename T>
 	void store(uint32_t address, T const & data);

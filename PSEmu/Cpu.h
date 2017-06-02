@@ -15,7 +15,7 @@ class Cpu
 	std::array < uint32_t ,34 > registers;
 	uint32_t programCounter;
 	std::shared_ptr<MemoryMap> memory;
-	uint32_t next_pc;
+	uint32_t next_instruction;
 
 	bool check_overflow(int64_t val);
 public:
