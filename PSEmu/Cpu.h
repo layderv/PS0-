@@ -3,12 +3,21 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
+#include <array>
 
 #include "Coprocessor.h"
 #include "MemoryMap.h"
 
 class Cpu
 {
+	using instruction_code = uint32_t;
+	std::array < std::unique_ptr<Coprocessor>,4 >  coprocessors;
+	std::array < uint32_t ,34 > registers;
+	uint32_t programCounter;
+	std::shared_ptr<MemoryMap> memory;
+
+
+	bool is_overflow(int64_t val);
 public:
 	Cpu(std::shared_ptr<MemoryMap> baseMemory, 
 		std::unique_ptr<Coprocessor>&& cop0,
