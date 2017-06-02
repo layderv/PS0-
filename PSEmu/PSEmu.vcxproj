@@ -66,12 +66,14 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Assembly.cpp" />
     <ClCompile Include="Coprocessor.cpp" />
     <ClCompile Include="Cpu.cpp" />
     <ClCompile Include="MemoryMap.cpp" />
     <ClCompile Include="PSEmu.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Assembly.h" />
     <ClInclude Include="Coprocessor.h" />
     <ClInclude Include="Cpu.h" />
     <ClInclude Include="MemoryDevice.h" />
