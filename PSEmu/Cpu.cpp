@@ -2,7 +2,7 @@
 
 
 Cpu::Cpu(std::shared_ptr<MemoryMap> baseMemory, std::unique_ptr<Coprocessor>&& cop0, std::unique_ptr<Coprocessor>&& cop1, std::unique_ptr<Coprocessor>&& cop2, std::unique_ptr<Coprocessor>&& cop3)
-	:memory(baseMemory),coprocessors{std::move(cop0),std::move(cop1),std::move(cop2),std::move(cop3)}
+	:memory(baseMemory), coprocessors{ std::move(cop0),std::move(cop1),std::move(cop2),std::move(cop3) }
 {
 }
 
@@ -40,7 +40,10 @@ void Cpu::Clock()
 	uint32_t comment;
 
 	// Fetch:
-	auto current_instruction = memory->read32(programCounter);
+	//fetch is pipelined. If program counter changes, the next instruction has already been fetched
+	auto current_instruction = next_instruction;
+	next_instruction = memory->read32(programCounter + 4);
+
 	// Decode:
 	uint32_t v = current_instruction;
 	secondary_opcode = v & 0x3f;
@@ -63,10 +66,12 @@ void Cpu::Clock()
 	// Exec:
 	switch (primary_opcode) {
 
-	// Loads
+		////////////
+		// Loads
+		////////////
 	case 0x20: //lb
 		auto val = memory->read8(registers[param1] + imm16);
-		reinterpret_cast<int32_t&>(registers[param2]) =	reinterpret_cast<int8_t&>(val);
+		reinterpret_cast<int32_t&>(registers[param2]) = reinterpret_cast<int8_t&>(val);
 		break;
 	case 0x21: //lh
 		auto val = memory->read16(registers[param1] + imm16);
@@ -86,7 +91,7 @@ void Cpu::Clock()
 		uint32_t left = (registers[param1] + imm16) % 4;
 		uint8_t *reg = reinterpret_cast<uint8_t*>(&registers[param2]);
 		// load left(upper) bytes of reg
-		memory->read(addr * 4, 1 + left, reg+(3-left));
+		memory->read(addr * 4, 1 + left, reg + (3 - left));
 		break;
 
 	case 0x26: //lwr
@@ -97,7 +102,10 @@ void Cpu::Clock()
 		memory->read(addr * 4 + left, 4 - left, reg);
 		break;
 
-	// Stores
+		////////////
+		// Stores
+		////////////
+
 	case 0x28: //sb
 		memory->store8(registers[param1] + imm16, reinterpret_cast<uint8_t*>(&registers[param2])[0]);
 		break;
@@ -122,7 +130,10 @@ void Cpu::Clock()
 		memory->store(addr * 4 + left, 4 - left, reg);
 		break;
 
-	//Arithmetic
+		////////////
+		//Arithmetic
+		////////////
+
 	case 0x08: //addi
 		int64_t result = static_cast<int64_t> (registers[param1]) + reinterpret_cast<int16_t const&>(imm16);
 		if (!check_overflow(result))
@@ -135,10 +146,70 @@ void Cpu::Clock()
 		registers[param2] = static_cast<uint32_t> (result);
 		break;
 
-	//Special:
+		////////////]
+		//Jumps
+		////////////
+
+	case 0x02: //j
+		programCounter &= 0xf0000000;
+		programCounter += imm26 * 4;
+		break;
+	case 0x03: //jal
+		registers[31] = programCounter + 8;
+		programCounter &= 0xf0000000;
+		programCounter += imm26 * 4;
+		break;
+	case 0x04: //beq
+		if (registers[param1] == registers[param2])
+			programCounter += 4 + reinterpret_cast<int16_t&>(imm16) * 4;
+		break;
+	case 0x05: //bne
+		if (registers[param1] != registers[param2])
+			programCounter += 4 + reinterpret_cast<int16_t&>(imm16) * 4;
+		break;
+	case 0x07: //bgtz
+		if (reinterpret_cast<int32_t&>(registers[param1]) > 0)
+			programCounter += 4 + reinterpret_cast<int16_t&>(imm16) * 4;
+		break;
+	case 0x06: //blez
+		if (reinterpret_cast<int32_t&>(registers[param1]) <= 0)
+			programCounter += 4 + reinterpret_cast<int16_t&>(imm16) * 4;
+		break;
+	case 0x01: //other jumps
+		switch (param2) {
+		case 0x00: //bltz
+			if (reinterpret_cast<int32_t&>(registers[param1]) < 0)
+				programCounter += 4 + reinterpret_cast<int16_t&>(imm16) * 4;
+			break;
+		case 0x01: //bgez
+			if (reinterpret_cast<int32_t&>(registers[param1]) >= 0)
+				programCounter += 4 + reinterpret_cast<int16_t&>(imm16) * 4;
+			break;
+		case 0x10: //bltzal
+			if (reinterpret_cast<int32_t&>(registers[param1]) < 0) {
+				registers[31] = programCounter + 8;
+				programCounter += 4 + reinterpret_cast<int16_t&>(imm16) * 4;
+			}
+			break;
+		case 0x11: //bgezal
+			if (reinterpret_cast<int32_t&>(registers[param1]) >= 0) {
+				registers[31] = programCounter + 8;
+				programCounter += 4 + reinterpret_cast<int16_t&>(imm16) * 4;
+			}
+			break;
+		}
+		break;
+
+		////////////
+		// Special
+		////////////
+
 	case 0x00:
 		switch (secondary_opcode) {
-			//Arithmetic
+			////////////
+			//Special Arithmetic
+			////////////
+
 		case 0x20: //add
 			int64_t result = static_cast<int64_t> (registers[param1]) + static_cast<int64_t> (registers[param2]);
 			if (!check_overflow(result))
@@ -157,10 +228,32 @@ void Cpu::Clock()
 			int64_t result = static_cast<int64_t> (registers[param1]) - static_cast<int64_t> (registers[param2]);
 			registers[param3] = static_cast<uint32_t>(result);
 			break;
+
+			////////////
+			//Special Jumps
+			////////////
+		case 0x08: //jr
+			programCounter = registers[param1];
+			break;
+		case 0x09: //jalr
+			registers[param3] = programCounter;
+			programCounter = registers[param1];
+			break;
+
+			////////////
+			//Exceptions/debug
+			////////////
+
+		case 0x0c: //syscall
+			// TODO syscall exception
+			break;
+		case 0x0d: //break
+			// TODO breakpoint exception
+			break;
 		}
 		break;
 	}
-
+	programCounter += 4;
 }
 
 Coprocessor & Cpu::GetCoprocessor(int copNumber)
