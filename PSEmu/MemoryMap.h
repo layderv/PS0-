@@ -46,6 +46,9 @@ public:
 	uint8_t read8(uint32_t address);
 	uint16_t read16(uint32_t address);
 	uint32_t read32(uint32_t address);
+	int8_t readi8(uint32_t address);
+	int16_t readi16(uint32_t address);
+	int32_t readi32(uint32_t address);
 	void read(uint32_t start_address, uint32_t size, uint8_t * out_data);
 	bool add_map(
 		std::shared_ptr<MemoryDevice> device,
