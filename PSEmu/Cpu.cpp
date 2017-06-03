@@ -72,6 +72,12 @@ void Cpu::Clock()
 	int32_t &rti = reinterpret_cast<int32_t&>(rt);
 	int32_t &rdi = reinterpret_cast<int32_t&>(rd);
 	int16_t &immi16 = reinterpret_cast<int16_t&>(imm16);
+	uint32_t & hi = registers[32];
+	uint32_t & lo = registers[33];
+	uint64_t &hilo = *reinterpret_cast<uint64_t*>(&hi);
+	int32_t & hii = reinterpret_cast<int32_t&>(hi);
+	int32_t & loi = reinterpret_cast<int32_t&>(lo);
+	int64_t &hiloi = *reinterpret_cast<int64_t*>(&hilo);
 	auto th = [](uint32_t&reg) { return reinterpret_cast<uint16_t*>(&reg); };
 	auto tb = [](uint32_t&reg) { return reinterpret_cast<uint8_t*>(&reg); };
 	auto thi = [](uint32_t&reg) { return reinterpret_cast<int16_t*>(&reg); };
@@ -322,6 +328,52 @@ void Cpu::Clock()
 			break;
 		case 0x07: //srav
 			rdi = rti << rs & 0x1f;
+			break;
+
+			////////////
+			//Special Multiply/Divide
+			////////////
+		case 0x18: // mult
+			hiloi = int64_t(rsi)* int64_t(rti);
+			break;
+		case 0x19: // multu
+			hilo = uint64_t(rs)* uint64_t(rt);
+			break;
+		case 0x1a: // div
+			if (rti == 0)
+			{
+				hii = rsi;
+				loi = rsi>0?-1:+1;
+			}
+			else
+			{
+				hii = rsi / rti;
+				loi = rsi % rti;
+			}
+			break;
+		case 0x1b: // divu
+			if (rt == 0)
+			{
+				hi = rs;
+				lo = 0xffffffff;
+			}
+			else
+			{
+				hi = rs / rt;
+				lo = rs % rt;
+			}
+			break;
+		case 0x10: //mfhi
+			rd = hi;
+			break;
+		case 0x11: //mthi
+			hi = rd;
+			break;
+		case 0x12: //mflo
+			rd = lo;
+			break;
+		case 0x13: //mtlo
+			lo = rd;
 			break;
 
 			////////////
