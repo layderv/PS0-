@@ -6,15 +6,16 @@
 #include "MemoryDevice.h"
 
 enum class Register : uint8_t;
-class Assembly: private std::vector<uint32_t>, private MemoryDevice
+class Assembly: public std::vector<uint32_t>, public MemoryDevice
 {
 public:
 	Assembly() = default;
 	~Assembly() = default;
+
 	Assembly& nop();
 
-	Assembly& lb(Register rs, Register rt, uint16_t imm);
-	Assembly& lbu(Register rs, Register rt, uint16_t imm);
+	Assembly& lb(Register rt, Register rs, uint16_t imm);
+	Assembly& lbu(Register rt, Register rs, uint16_t imm);
 	Assembly& lh(Register rs, Register rt, uint16_t imm);
 	Assembly& lhu(Register rs, Register rt, uint16_t imm);
 	Assembly& lw(Register rs, Register rt, uint16_t imm);

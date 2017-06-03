@@ -78,13 +78,13 @@ Assembly & Assembly::swr(Register rt, Register rs, uint16_t imm)
 
 Assembly & Assembly::j(uint32_t imm26)
 {
-	push_back(0x02 << 26 + ((imm26 & 0xfffffff) >> 2));
+	push_back((0x02 << 26) + ((imm26 & 0xfffffff) >> 2));
 	return *this;
 }
 
 Assembly & Assembly::jal(uint32_t imm26)
 {
-	push_back(0x03 << 26 + ((imm26 & 0xfffffff) >> 2));
+	push_back((0x03 << 26) + ((imm26 & 0xfffffff) >> 2));
 	return *this;
 }
 
