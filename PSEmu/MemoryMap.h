@@ -58,6 +58,7 @@ public:
 	}
 	bool add_map(map_type const & map);
 	bool remove_map(uint32_t mapBaseAddress);
+	MemoryMap() = default;
 	MemoryMap(std::initializer_list < map_type > init_list);
 	~MemoryMap();
 };

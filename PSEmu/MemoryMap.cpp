@@ -10,13 +10,13 @@ std::vector<std::pair<uint32_t,uint32_t>> MemoryMap::find_maps_for_range(uint32_
 	uint32_t address = begin;
 	auto marker_it = markers.begin();
 	while (address < end){
-		marker_it = std::find_if(marker_it, markers.end(), [&](auto &e) { return e.first < address; });
+		marker_it = std::find_if(marker_it, markers.end(), [&](auto &e) { return e.first <= address; });
 		if (marker_it != markers.end()) {
-			auto marker = *marker_it;
-			if (marker.second >= address)
+			auto marker = *marker_it++;
+			if (marker.second > address)
 			{
-				address = std::min(end, marker.first);
-				relevant_maps.emplace_back(marker.second,address);
+				address = std::min(end, marker.second);
+				relevant_maps.push_back(marker);
 			}
 		}
 		else
@@ -136,6 +136,8 @@ uint32_t MemoryMap::read32(uint32_t address)
 
 void MemoryMap::read(uint32_t start_address, uint32_t size, uint8_t * out_data)
 {
+	auto range = find_maps_for_range(start_address, start_address + size);
+	read_in_ranges(range.begin(), range.end(), start_address, start_address + size, out_data);
 }
 
 bool MemoryMap::add_map(map_type const &map)
@@ -148,7 +150,7 @@ bool MemoryMap::add_map(map_type const &map)
 	else {
 		maps.emplace(mapBaseAddress, map);
 		//markers.emplace(mapBaseAddress, mapBaseAddress);
-		markers.emplace(mapBaseAddress + mapSize, mapBaseAddress);
+		markers.emplace(mapBaseAddress, mapBaseAddress+mapSize);
 		return true;
 	}
 }
@@ -159,7 +161,7 @@ bool MemoryMap::remove_map(uint32_t baseAddress)
 	if (mapIt != maps.end()) {
 		auto map = std::move(mapIt->second);
 		maps.erase(mapIt);
-		markers.erase(std::get<1>(map) + std::get<2>(map));
+		markers.erase(baseAddress);
 		return true;
 	}
 	else
