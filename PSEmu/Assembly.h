@@ -14,8 +14,8 @@ public:
 
 	Assembly& nop();
 
-	Assembly& lb(Register rt, Register rs, uint16_t imm);
-	Assembly& lbu(Register rt, Register rs, uint16_t imm);
+	Assembly& lb(Register rs, Register rt, uint16_t imm);
+	Assembly& lbu(Register rs, Register rt, uint16_t imm);
 	Assembly& lh(Register rs, Register rt, uint16_t imm);
 	Assembly& lhu(Register rs, Register rt, uint16_t imm);
 	Assembly& lw(Register rs, Register rt, uint16_t imm);
