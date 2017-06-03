@@ -22,7 +22,7 @@ int main()
 		.lb(R(3), R(0), 8)
 		.lbu(R(4), R(0), 8)
 		.lh(R(5), R(0), 4)
-		.lhu(R(5),R(0),4)
+		.lhu(R(6), R(0), 4)
 		.jal(0)
 		;
 
@@ -39,7 +39,7 @@ int main()
 
 	while (1) {
 		cpu.Clock();
-		printf("Program Counter: %#010x %#010x\n", cpu.DebugGetPC(), cpu.DebugGetPC()- code_base_addr);
+		printf("Program Counter: %#010x %#010x\n", cpu.DebugGetPC(), cpu.DebugGetPC() - code_base_addr);
 		printf("%#010x %#010x %#010x %#010x %#010x %#010x %#010x %#010x\n",
 			cpu.DebugGetReg(R(0)),
 			cpu.DebugGetReg(R(1)),

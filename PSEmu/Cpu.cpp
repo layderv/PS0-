@@ -29,6 +29,7 @@ bool Cpu::check_overflow(int64_t val) {
 	return false;
 
 }
+
 void Cpu::Clock()
 {
 	// TODO: check endianness
@@ -70,6 +71,7 @@ void Cpu::Clock()
 	int32_t &rsi = reinterpret_cast<int32_t&>(rs);
 	int32_t &rti = reinterpret_cast<int32_t&>(rt);
 	int32_t &rdi = reinterpret_cast<int32_t&>(rd);
+	int16_t &immi16 = reinterpret_cast<int16_t&>(imm16);
 	//assert(v == 0);
 
 	// Exec:
@@ -79,17 +81,11 @@ void Cpu::Clock()
 		// Loads
 		////////////
 	case 0x20: //lb
-	{
-		auto val = memory->read8(rs + imm16);
-		reinterpret_cast<int32_t&>(rt) = reinterpret_cast<int8_t&>(val);
+		rti = memory->readi8(rs + imm16);
 		break;
-	}
 	case 0x21: //lh
-	{
-		auto val = memory->read16(rs + imm16);
-		reinterpret_cast<int32_t&>(rt) = reinterpret_cast<int16_t&>(val);
+		rti = memory->readi16(rs + imm16);
 		break;
-	}
 	case 0x23: //lw
 		rt = memory->read32(rs + imm16);
 		break;
@@ -100,14 +96,15 @@ void Cpu::Clock()
 		rt = memory->read16(rs + imm16);
 		break;
 	case 0x22: //lwl
+		//todo: refactor
 	{
 		uint32_t addr = (rs + imm16) / 4;
 		uint32_t left = (rs + imm16) % 4;
 		uint8_t *reg = reinterpret_cast<uint8_t*>(&rt);
 		// load left(upper) bytes of reg
 		memory->read(addr * 4, 1 + left, reg + (3 - left));
-		break;
 	}
+	break;
 	case 0x26: //lwr
 	{
 		uint32_t addr = (rs + imm16) / 4;
@@ -155,49 +152,40 @@ void Cpu::Clock()
 
 	case 0x08: //addi
 	{
-		int64_t result = static_cast<int64_t> (rs) + reinterpret_cast<int16_t const&>(imm16);
+		int64_t result = rsi + immi16;
 		if (!check_overflow(result))
-			rt = static_cast<uint32_t> (result);
+			rti = result;
 		break;
 	}
 	case 0x09: //addiu
-	{
-		int64_t result = static_cast<int64_t> (rs) + +reinterpret_cast<int16_t const&>(imm16);
-		rt = static_cast<uint32_t> (result);
+		rt = rs + immi16;
 		break;
-	}
 
 
-	////////////
-	//Comparison
-	////////////
+
+		////////////
+		//Comparison
+		////////////
 
 	case 0x0a: //slti
-	{
-		int32_t rsi = reinterpret_cast<int32_t&>(rs);
-		int32_t val = reinterpret_cast<int16_t&>(imm16);
-		rt = rsi > val ? 1 : 0;
-	}
+		rt = rsi > immi16 ? 1 : 0;
 	case 0x0b: //sltiu
-	{
-		uint32_t val = imm16;
-		rt = rs > val ? 1 : 0;
-	}
+		rt = rs > imm16 ? 1 : 0;
 
 
-	////////////
-	//Logical
-	////////////
+		////////////
+		//Logical
+		////////////
 	case 0x0c: //andi
-		rt=rs&imm16;
+		rt = rs&imm16;
 	case 0x0d: //ori
-		rt = rs|imm16;
+		rt = rs | imm16;
 	case 0x0e: //xori
 		rt = rs^imm16;
 
-	////////////]
-	//Jumps
-	////////////
+		////////////
+		//Jumps
+		////////////
 
 	case 0x02: //j
 		programCounter &= 0xf0000000;
@@ -210,40 +198,40 @@ void Cpu::Clock()
 		break;
 	case 0x04: //beq
 		if (rs == rt)
-			programCounter += 4 + reinterpret_cast<int16_t&>(imm16) * 4;
+			programCounter += 4 + immi16 * 4;
 		break;
 	case 0x05: //bne
 		if (rs != rt)
-			programCounter += 4 + reinterpret_cast<int16_t&>(imm16) * 4;
+			programCounter += 4 + immi16 * 4;
 		break;
 	case 0x07: //bgtz
-		if (reinterpret_cast<int32_t&>(rs) > 0)
-			programCounter += 4 + reinterpret_cast<int16_t&>(imm16) * 4;
+		if (rsi > 0)
+			programCounter += 4 + immi16 * 4;
 		break;
 	case 0x06: //blez
-		if (reinterpret_cast<int32_t&>(rs) <= 0)
-			programCounter += 4 + reinterpret_cast<int16_t&>(imm16) * 4;
+		if (rsi <= 0)
+			programCounter += 4 + immi16 * 4;
 		break;
 	case 0x01: //other jumps
 		switch (param2) {
 		case 0x00: //bltz
-			if (reinterpret_cast<int32_t&>(rs) < 0)
-				programCounter += 4 + reinterpret_cast<int16_t&>(imm16) * 4;
+			if (rsi < 0)
+				programCounter += 4 + immi16 * 4;
 			break;
 		case 0x01: //bgez
-			if (reinterpret_cast<int32_t&>(rs) >= 0)
-				programCounter += 4 + reinterpret_cast<int16_t&>(imm16) * 4;
+			if (rsi >= 0)
+				programCounter += 4 + immi16 * 4;
 			break;
 		case 0x10: //bltzal
-			if (reinterpret_cast<int32_t&>(rs) < 0) {
+			if (rsi < 0) {
 				registers[31] = programCounter + 8;
-				programCounter += 4 + reinterpret_cast<int16_t&>(imm16) * 4;
+				programCounter += 4 + immi16 * 4;
 			}
 			break;
 		case 0x11: //bgezal
-			if (reinterpret_cast<int32_t&>(rs) >= 0) {
+			if (rsi >= 0) {
 				registers[31] = programCounter + 8;
-				programCounter += 4 + reinterpret_cast<int16_t&>(imm16) * 4;
+				programCounter += 4 + immi16 * 4;
 			}
 			break;
 		}
@@ -256,10 +244,10 @@ void Cpu::Clock()
 
 	case 0x00:
 		switch (secondary_opcode) {
-		
-		////////////
-		//Special Arithmetic
-		////////////
+
+			////////////
+			//Special Arithmetic
+			////////////
 
 		case 0x20: //add
 		{
@@ -294,9 +282,7 @@ void Cpu::Clock()
 
 		case 0x2a: //slt
 		{
-			int32_t rsi = reinterpret_cast<int32_t&>(rs);
-			int32_t val = reinterpret_cast<int16_t&>(imm16);
-			rt = rsi > val ? 1 : 0;
+			rt = rsi > immi16 ? 1 : 0;
 			break;
 		}
 		case 0x2b: //sltu
@@ -323,9 +309,9 @@ void Cpu::Clock()
 			break;
 
 
-		////////////
-		//Special Jumps
-		////////////
+			////////////
+			//Special Jumps
+			////////////
 
 		case 0x08: //jr
 			programCounter = rs;
