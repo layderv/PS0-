@@ -72,6 +72,10 @@ void Cpu::Clock()
 	int32_t &rti = reinterpret_cast<int32_t&>(rt);
 	int32_t &rdi = reinterpret_cast<int32_t&>(rd);
 	int16_t &immi16 = reinterpret_cast<int16_t&>(imm16);
+	auto th = [](uint32_t&reg) { return reinterpret_cast<uint16_t*>(&reg); };
+	auto tb = [](uint32_t&reg) { return reinterpret_cast<uint8_t*>(&reg); };
+	auto thi = [](uint32_t&reg) { return reinterpret_cast<int16_t*>(&reg); };
+	auto tbi = [](uint32_t&reg) { return reinterpret_cast<int8_t*>(&reg); };
 	//assert(v == 0);
 
 	// Exec:
@@ -100,7 +104,7 @@ void Cpu::Clock()
 	{
 		uint32_t addr = (rs + imm16) / 4;
 		uint32_t left = (rs + imm16) % 4;
-		uint8_t *reg = reinterpret_cast<uint8_t*>(&rt);
+		uint8_t *reg = tb(rt);
 		// load left(upper) bytes of reg
 		memory->read(addr * 4, 1 + left, reg + (3 - left));
 	}
@@ -109,7 +113,7 @@ void Cpu::Clock()
 	{
 		uint32_t addr = (rs + imm16) / 4;
 		uint32_t left = (rs + imm16) % 4;
-		uint8_t *reg = reinterpret_cast<uint8_t*>(&rt);
+		uint8_t *reg = tb(rt);
 		// load right(lower) bytes of reg
 		memory->read(addr * 4 + left, 4 - left, reg);
 		break;
@@ -119,10 +123,10 @@ void Cpu::Clock()
 	////////////
 
 	case 0x28: //sb
-		memory->store8(rs + imm16, reinterpret_cast<uint8_t*>(&rt)[0]);
+		memory->store8(rs + imm16, tb(rt)[0]);
 		break;
 	case 0x29: //sh
-		memory->store16(rs + imm16, reinterpret_cast<uint16_t*>(&rt)[0]);
+		memory->store16(rs + imm16, tb(rt)[0]);
 		break;
 	case 0x2b: //sw
 		memory->store32(rs + imm16, rt);
@@ -131,7 +135,7 @@ void Cpu::Clock()
 	{
 		uint32_t addr = (rs + imm16) / 4;
 		uint32_t left = (rs + imm16) % 4;
-		uint8_t *reg = reinterpret_cast<uint8_t*>(&rt);
+		uint8_t *reg = tb(rt);
 		// store left(upper) bytes of reg
 		memory->store(addr * 4, 1 + left, reg + (3 - left));
 		break;
@@ -140,7 +144,7 @@ void Cpu::Clock()
 	{
 		uint32_t addr = (rs + imm16) / 4;
 		uint32_t left = (rs + imm16) % 4;
-		uint8_t *reg = reinterpret_cast<uint8_t*>(&rt);
+		uint8_t *reg = tb(rt);
 		// store right(lower) bytes of reg
 		memory->store(addr * 4 + left, 4 - left, reg);
 		break;
@@ -253,44 +257,33 @@ void Cpu::Clock()
 		{
 			int64_t result = static_cast<int64_t> (rs) + static_cast<int64_t> (rt);
 			if (!check_overflow(result))
-				rd = static_cast<uint32_t>(result);
+				rdi = result;
 			break;
 		}
 		case 0x21: //addu
-		{
-			int64_t result = static_cast<int64_t> (rs) + static_cast<int64_t> (rt);
-			rd = static_cast<uint32_t>(result);
+			rd = rs + rt;
 			break;
-		}
 		case 0x22: //sub
 		{
 			int64_t result = static_cast<int64_t> (rs) - static_cast<int64_t> (rt);
 			if (!check_overflow(result))
-				rd = static_cast<uint32_t>(result);
+				rdi = result;
 			break;
 		}
 		case 0x23: //subu
-		{
-			int64_t result = static_cast<int64_t> (rs) - static_cast<int64_t> (rt);
-			rd = static_cast<uint32_t>(result);
+			rd = rs - rt;
 			break;
-		}
 
 		////////////
 		//Special Comparison
 		////////////
 
 		case 0x2a: //slt
-		{
 			rt = rsi > immi16 ? 1 : 0;
 			break;
-		}
 		case 0x2b: //sltu
-		{
-			uint32_t val = imm16;
-			rt = rs > val ? 1 : 0;
+			rt = rs > imm16 ? 1 : 0;
 			break;
-		}
 
 		////////////
 		//Special Logical
@@ -310,6 +303,28 @@ void Cpu::Clock()
 
 
 			////////////
+			//Special Shift
+			////////////
+		case 0x00: //sll
+			rd = rt << param4;
+			break;
+		case 0x02: //srl
+			rd = rt >> param4;
+			break;
+		case 0x03: //sra
+			rdi = rti << param4;
+			break;
+		case 0x04: //sllv
+			rd = rt << rs & 0x1f;
+			break;
+		case 0x06: //srlv
+			rd = rt >> rs & 0x1f;
+			break;
+		case 0x07: //srav
+			rdi = rti << rs & 0x1f;
+			break;
+
+			////////////
 			//Special Jumps
 			////////////
 
@@ -317,12 +332,11 @@ void Cpu::Clock()
 			programCounter = rs;
 			break;
 		case 0x09: //jalr
-		{
 			rd = programCounter;
 			programCounter = rs;
 			break;
-		}
-		
+
+
 		////////////
 		//Exceptions/debug
 		////////////
