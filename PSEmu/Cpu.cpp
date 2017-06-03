@@ -13,7 +13,9 @@ Cpu::~Cpu()
 
 void Cpu::Reset(uint32_t pc)
 {
-	programCounter = pc;
+	programCounter = (pc/4)*4;
+	next_instruction = 0;// memory->read32(programCounter);
+//	programCounter += 4;
 	for (auto &r : registers) {
 		r = 0;
 	}
@@ -281,20 +283,22 @@ Coprocessor & Cpu::GetCoprocessor(int copNumber)
 	// TODO: insert return statement here
 }
 
-void Cpu::DebugSetReg(int number, uint32_t value)
+void Cpu::DebugSetReg(Register number, uint32_t value)
 {
+	registers[uint8_t(number)] = value;
 }
 
 void Cpu::DebugSetPC(uint32_t value)
 {
+	programCounter = value;
 }
 
-uint32_t Cpu::DebugGetReg(int number)
+uint32_t Cpu::DebugGetReg(Register number)
 {
-	return uint32_t();
+	return registers[uint8_t(number)];
 }
 
 uint32_t Cpu::DebugGetPC()
 {
-	return uint32_t();
+	return programCounter;
 }

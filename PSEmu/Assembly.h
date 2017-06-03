@@ -6,7 +6,7 @@
 #include "MemoryDevice.h"
 
 enum class Register : uint8_t;
-class Assembly: private std::vector<uint32_t>, private MemoryDevice
+class Assembly: public std::vector<uint32_t>, public MemoryDevice
 {
 public:
 	Assembly() = default;

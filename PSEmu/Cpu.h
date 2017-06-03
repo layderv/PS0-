@@ -8,6 +8,8 @@
 #include "Coprocessor.h"
 #include "MemoryMap.h"
 
+#include "Registers.h"
+
 class Cpu
 {
 	using instruction_code = uint32_t;
@@ -30,9 +32,9 @@ public:
 	void Clock();
 	Coprocessor& GetCoprocessor(int copNumber);
 
-	void DebugSetReg(int number, uint32_t value);
+	void DebugSetReg(Register number, uint32_t value);
 	void DebugSetPC(uint32_t value);
-	uint32_t DebugGetReg(int number);
+	uint32_t DebugGetReg(Register number);
 	uint32_t DebugGetPC();
 
 };
