@@ -79,6 +79,7 @@
     <ClInclude Include="MemoryDevice.h" />
     <ClInclude Include="MemoryMap.h" />
     <ClInclude Include="PSEmu.h" />
+    <ClInclude Include="Registers.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

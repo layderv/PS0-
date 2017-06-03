@@ -50,5 +50,8 @@
     <ClInclude Include="Assembly.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Registers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
