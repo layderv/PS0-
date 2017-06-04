@@ -70,7 +70,53 @@ public:
 	Assembly& sw(Register rs, Register rt, uint16_t imm);
 	Assembly& swr(Register rs, Register rt, uint16_t imm);
 
-	// COP
+	// Secondary OPCodes (when (op >> 26) == 0)
+	/*
+		  00h=SLL   08h=JR      10h=MFHI 18h=MULT  20h=ADD  28h=N/A  30h=N/A  38h=N/A
+		  01h=N/A   09h=JALR    11h=MTHI 19h=MULTU 21h=ADDU 29h=N/A  31h=N/A  39h=N/A
+		  02h=SRL   0Ah=N/A     12h=MFLO 1Ah=DIV   22h=SUB  2Ah=SLT  32h=N/A  3Ah=N/A
+		  03h=SRA   0Bh=N/A     13h=MTLO 1Bh=DIVU  23h=SUBU 2Bh=SLTU 33h=N/A  3Bh=N/A
+		  04h=SLLV  0Ch=SYSCALL 14h=N/A  1Ch=N/A   24h=AND  2Ch=N/A  34h=N/A  3Ch=N/A
+		  05h=N/A   0Dh=BREAK   15h=N/A  1Dh=N/A   25h=OR   2Dh=N/A  35h=N/A  3Dh=N/A
+		  06h=SRLV  0Eh=N/A     16h=N/A  1Eh=N/A   26h=XOR  2Eh=N/A  36h=N/A  3Eh=N/A
+		  07h=SRAV  0Fh=N/A     17h=N/A  1Fh=N/A   27h=NOR  2Fh=N/A  37h=N/A  3Fh=N/A
+	*/
+
+	Assembly& sll(Register rd, Register rt, uint8_t imm);
+	Assembly& srl(Register rd, Register rt, uint8_t imm);
+	Assembly& sra(Register rd, Register rt, uint8_t imm);
+	Assembly& sllv(Register rd, Register rt, uint8_t imm);
+	Assembly& srlv(Register rd, Register rt, uint8_t imm);
+	Assembly& srav(Register rd, Register rt, uint8_t imm);
+
+	Assembly& jr(Register rs);
+	Assembly& jalr(Register rs, Register rd);
+
+	Assembly& sys(uint32_t comm);
+	Assembly& brk(uint32_t comm);
+	
+	Assembly& mfhi(Register rd);
+	Assembly& mthi(Register rs);
+	Assembly& mflo(Register rd);
+	Assembly& mtlo(Register rs);
+
+	Assembly& mult(Register rs, Register rt);
+	Assembly& multu(Register rs, Register rt);
+	Assembly& div(Register rs, Register rt);
+	Assembly& divu(Register rs, Register rt);
+	Assembly& add(Register rd, Register rs, Register rt);
+	Assembly& addu(Register rd, Register rs, Register rt);
+	Assembly& sub(Register rd, Register rs, Register rt);
+	Assembly& subu(Register rd, Register rs, Register rt);
+	Assembly& and(Register rd, Register rs, Register rt);
+	Assembly& or(Register rd, Register rs, Register rt);
+	Assembly& xor(Register rd, Register rs, Register rt);
+	Assembly& nor(Register rd, Register rs, Register rt);
+	Assembly& slt(Register rd, Register rs, Register rt);
+	Assembly& sltu(Register rd, Register rs, Register rt);
+
+
+
 	Assembly& lwc0(Register rs, Register rt, uint16_t imm);
 	Assembly& lwc1(Register rs, Register rt, uint16_t imm);
 	Assembly& lwc2(Register rs, Register rt, uint16_t imm);

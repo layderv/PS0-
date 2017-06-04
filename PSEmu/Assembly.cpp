@@ -189,4 +189,171 @@ uint8_t Assembly::RNO(Register r)
 	return static_cast<uint8_t>(r);
 }
 
+Assembly & Assembly::mult(Register rs, Register rt)
+{
+	this->push_back((RNO(rs) << 21) + (RNO(rt) << 16) + 0x18);
+	return *this;
+}
+
+Assembly & Assembly::multu(Register rs, Register rt)
+{
+	this->push_back((RNO(rs) << 21) + (RNO(rt) << 16) + 0x19);
+	return *this;
+}
+
+Assembly & Assembly::div(Register rs, Register rt)
+{
+	this->push_back((RNO(rs) << 21) + (RNO(rt) << 16) + 0x1a);
+	return *this;
+}
+
+Assembly & Assembly::divu(Register rs, Register rt)
+{
+	this->push_back((RNO(rs) << 21) + (RNO(rt) << 16) + 0x1b);
+	return *this;
+}
+
+Assembly & Assembly::add(Register rd, Register rs, Register rt)
+{
+	this->push_back((RNO(rs) << 21) + (RNO(rt) << 16) + (RNO(rd) << 11) + 0x20);
+	return *this;
+}
+
+Assembly & Assembly::addu(Register rd, Register rs, Register rt)
+{
+	this->push_back((RNO(rs) << 21) + (RNO(rt) << 16) + (RNO(rd) << 11) + 0x21);
+	return *this;
+}
+
+Assembly & Assembly::sub(Register rd, Register rs, Register rt)
+{
+	this->push_back((RNO(rs) << 21) + (RNO(rt) << 16) + (RNO(rd) << 11) + 0x22);
+	return *this;
+}
+
+Assembly & Assembly::subu(Register rd, Register rs, Register rt)
+{
+	this->push_back((RNO(rs) << 21) + (RNO(rt) << 16) + (RNO(rd) << 11) + 0x23);
+	return *this;
+}
+
+Assembly & Assembly:: and(Register rd, Register rs, Register rt)
+{
+	this->push_back((RNO(rs) << 21) + (RNO(rt) << 16) + (RNO(rd) << 11) + 0x24);
+	return *this;
+}
+
+Assembly & Assembly:: or(Register rd, Register rs, Register rt)
+{
+	this->push_back((RNO(rs) << 21) + (RNO(rt) << 16) + (RNO(rd) << 11) + 0x25);
+	return *this;
+}
+
+Assembly & Assembly:: xor(Register rd, Register rs, Register rt)
+{
+	this->push_back((RNO(rs) << 21) + (RNO(rt) << 16) + (RNO(rd) << 11) + 0x26);
+	return *this;
+}
+
+Assembly & Assembly::nor(Register rd, Register rs, Register rt)
+{
+	this->push_back((RNO(rs) << 21) + (RNO(rt) << 16) + (RNO(rd) << 11) + 0x27);
+	return *this;
+}
+
+Assembly & Assembly::slt(Register rd, Register rs, Register rt)
+{
+	this->push_back((RNO(rs) << 21) + (RNO(rt) << 16) + (RNO(rd) << 11) + 0x2a);
+	return *this;
+}
+
+Assembly & Assembly::sltu(Register rd, Register rs, Register rt)
+{
+	this->push_back((RNO(rs) << 21) + (RNO(rt) << 16) + (RNO(rd) << 11) + 0x2b);
+	return *this;
+}
+
+Assembly & Assembly::sll(Register rd, Register rt, uint8_t imm)
+{
+	this->push_back((RNO(rt) << 16) + (RNO(rd) << 11) + (imm & 0xe0) + 0);
+	return *this;
+}
+
+Assembly & Assembly::srl(Register rd, Register rt, uint8_t imm)
+{
+	this->push_back((RNO(rt) << 16) + (RNO(rd) << 11) + (imm & 0xe0) + 0x02);
+	return *this;
+}
+
+Assembly & Assembly::sra(Register rd, Register rt, uint8_t imm)
+{
+	this->push_back((RNO(rt) << 16) + (RNO(rd) << 11) + (imm & 0xe0) + 0x03);
+	return *this;
+}
+
+Assembly & Assembly::sllv(Register rd, Register rt, uint8_t imm)
+{
+	this->push_back((RNO(rt) << 16) + (RNO(rd) << 11) + (imm & 0xe0) + 0x04);
+	return *this;
+}
+
+Assembly & Assembly::srlv(Register rd, Register rt, uint8_t imm)
+{
+	this->push_back((RNO(rt) << 16) + (RNO(rd) << 11) + (imm & 0xe0) + 0x06);
+	return *this;
+}
+
+Assembly & Assembly::srav(Register rd, Register rt, uint8_t imm)
+{
+	this->push_back((RNO(rt) << 16) + (RNO(rd) << 11) + (imm & 0xe0) + 0x07);
+	return *this;
+}
+
+Assembly & Assembly::jr(Register rs)
+{
+	this->push_back((RNO(rs) << 21) + 0x08);
+	return *this;
+}
+
+Assembly & Assembly::jalr(Register rs, Register rd)
+{
+	this->push_back((RNO(rs) << 21) + (RNO(rd) << 11) + 0x09);
+	return *this;
+}
+
+Assembly & Assembly::sys(uint32_t comm)
+{
+	this->push_back((comm & 0xfffff) + 0x0c);
+	return *this;
+}
+
+Assembly & Assembly::brk(uint32_t comm)
+{
+	this->push_back((comm & 0xfffff) + 0x0d);
+	return *this;
+}
+
+Assembly & Assembly::mfhi(Register rd)
+{
+	this->push_back((RNO(rd) << 11) + 0x10);
+	return *this;
+}
+
+Assembly & Assembly::mthi(Register rs)
+{
+	this->push_back((RNO(rs) << 21) + 0x11);
+	return *this;
+}
+
+Assembly & Assembly::mflo(Register rd)
+{
+	this->push_back((RNO(rd) << 11) + 0x12);
+	return *this;
+}
+
+Assembly & Assembly::mtlo(Register rs)
+{
+	this->push_back((RNO(rs) << 21) + 0x13);
+	return *this;
+}
 
