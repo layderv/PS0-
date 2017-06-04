@@ -134,6 +134,20 @@ uint32_t MemoryMap::read32(uint32_t address)
 	return read<uint32_t>(address);
 }
 
+int8_t MemoryMap::readi8(uint32_t address)
+{
+	return read<int8_t>(address);
+}
+
+int16_t MemoryMap::readi16(uint32_t address)
+{
+	return read<int16_t>(address);
+}
+
+int32_t MemoryMap::readi32(uint32_t address)
+{
+	return read<int32_t>(address);
+}
 void MemoryMap::read(uint32_t start_address, uint32_t size, uint8_t * out_data)
 {
 	auto range = find_maps_for_range(start_address, start_address + size);

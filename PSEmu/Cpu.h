@@ -20,6 +20,7 @@ class Cpu
 	uint32_t next_instruction;
 
 	bool check_overflow(int64_t val);
+
 public:
 	Cpu(std::shared_ptr<MemoryMap> baseMemory, 
 		std::unique_ptr<Coprocessor>&& cop0,
