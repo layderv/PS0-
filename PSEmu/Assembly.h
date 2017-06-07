@@ -129,7 +129,20 @@ public:
 
 
 
+	// pseudo instructions (see https://en.wikibooks.org/wiki/MIPS_Assembly/Pseudoinstructions )
+	Assembly& move(Register target, Register source) {
+		return add(target, source, Register::ZERO);
+	}
 
+	Assembly& li(Register target, uint32_t immediate) {
+		if (immediate >> 16 > 0)
+			return lui(target, immediate >> 16).ori(target, target, immediate & 0xffff);
+		else
+			return ori(target, Register::ZERO, immediate & 0xffff);
+	}
+	Assembly& li(Register target, int32_t immediate) {
+		return li(target,reinterpret_cast<uint32_t&>(immediate));
+	}
 	
 
 
