@@ -1,6 +1,8 @@
 #pragma once
 #include <cstdint>
 #include <vector>
+#include <unordered_map>
+
 #include "Registers.h"
 
 #include "MemoryDevice.h"
@@ -8,6 +10,7 @@
 enum class Register : uint8_t;
 class Assembly: public std::vector<uint32_t>, public MemoryDevice
 {
+	std::unordered_map<std::string,uint32_t> labels;
 public:
 	Assembly() = default;
 	~Assembly() = default;
@@ -144,6 +147,14 @@ public:
 		return li(target,reinterpret_cast<uint32_t&>(immediate));
 	}
 	
+	// Label creation/recall
+	Assembly& label(std::string name) {
+		labels.emplace(name, size()*4);
+		return *this;
+	}
+	uint32_t labelAddr(std::string name) {
+		return labels[name];
+	}
 
 
 	// MemoryDevice
