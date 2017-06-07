@@ -108,9 +108,9 @@ public:
 	Assembly& addu(Register rd, Register rs, Register rt);
 	Assembly& sub(Register rd, Register rs, Register rt);
 	Assembly& subu(Register rd, Register rs, Register rt);
-	Assembly& and(Register rd, Register rs, Register rt);
-	Assembly& or(Register rd, Register rs, Register rt);
-	Assembly& xor(Register rd, Register rs, Register rt);
+	Assembly& And(Register rd, Register rs, Register rt);
+	Assembly& Or(Register rd, Register rs, Register rt);
+	Assembly& Xor(Register rd, Register rs, Register rt);
 	Assembly& nor(Register rd, Register rs, Register rt);
 	Assembly& slt(Register rd, Register rs, Register rt);
 	Assembly& sltu(Register rd, Register rs, Register rt);

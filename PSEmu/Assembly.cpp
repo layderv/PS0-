@@ -237,19 +237,19 @@ Assembly & Assembly::subu(Register rd, Register rs, Register rt)
 	return *this;
 }
 
-Assembly & Assembly:: and(Register rd, Register rs, Register rt)
+Assembly & Assembly:: And(Register rd, Register rs, Register rt)
 {
 	this->push_back((RNO(rs) << 21) + (RNO(rt) << 16) + (RNO(rd) << 11) + 0x24);
 	return *this;
 }
 
-Assembly & Assembly:: or(Register rd, Register rs, Register rt)
+Assembly & Assembly:: Or(Register rd, Register rs, Register rt)
 {
 	this->push_back((RNO(rs) << 21) + (RNO(rt) << 16) + (RNO(rd) << 11) + 0x25);
 	return *this;
 }
 
-Assembly & Assembly:: xor(Register rd, Register rs, Register rt)
+Assembly & Assembly:: Xor(Register rd, Register rs, Register rt)
 {
 	this->push_back((RNO(rs) << 21) + (RNO(rt) << 16) + (RNO(rd) << 11) + 0x26);
 	return *this;
