@@ -136,9 +136,9 @@ Assembly & Assembly::addi(Register rs, Register rt, uint16_t imm)
 	return *this;
 }
 
-Assembly & Assembly::addiu(Register rs, Register rt, uint16_t imm)
+Assembly & Assembly::addiu(Register rs, Register rt, int16_t imm)
 {
-	this->push_back((0x09 << 26) + (RNO(rs) << 21) + (RNO(rt) << 16) + imm);
+	this->push_back((0x09 << 26) | (RNO(rs) << 21) | (RNO(rt) << 16) | imm);
 	return *this;
 }
 

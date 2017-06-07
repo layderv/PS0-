@@ -41,7 +41,7 @@ public:
 	Assembly& bgtz(Register rs, Register rt, uint16_t dest);
 
 	Assembly& addi(Register rt, Register rs, uint16_t imm);
-	Assembly& addiu(Register rt, Register rs, uint16_t imm);
+	Assembly& addiu(Register rt, Register rs, int16_t imm);
 
 	Assembly& slti(Register rt, Register rs, uint16_t imm);
 	Assembly& sltiu(Register rt, Register rs, uint16_t imm);
