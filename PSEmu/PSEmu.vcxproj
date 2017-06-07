@@ -74,6 +74,7 @@
     <ClCompile Include="PSEmu.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Alu.h" />
     <ClInclude Include="Assembly.h" />
     <ClInclude Include="Cop0.h" />
     <ClInclude Include="Coprocessor.h" />
