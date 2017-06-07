@@ -188,10 +188,20 @@ void Cpu::Clock()
 		////////////
 	case 0x0c: //andi
 		rt = rs&imm16;
+		break;
 	case 0x0d: //ori
 		rt = rs | imm16;
+		break;
 	case 0x0e: //xori
 		rt = rs^imm16;
+		break;
+
+		////////////
+		//Shift
+		////////////
+	case 0x0f: //lui
+		rt = imm16 << 16;
+		break;
 
 		////////////
 		//Jumps
@@ -343,7 +353,7 @@ void Cpu::Clock()
 			if (rti == 0)
 			{
 				hii = rsi;
-				loi = rsi>0?-1:+1;
+				loi = rsi>0 ? -1 : +1;
 			}
 			else
 			{
