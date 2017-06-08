@@ -74,11 +74,13 @@
     <ClCompile Include="PSEmu.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Alu.h" />
+    <ClInclude Include="AluOpcodes.h" />
     <ClInclude Include="Assembly.h" />
     <ClInclude Include="Cop0.h" />
     <ClInclude Include="Coprocessor.h" />
     <ClInclude Include="Cpu.h" />
+    <ClInclude Include="Instruction.h" />
+    <ClInclude Include="MemoryOpcodes.h" />
     <ClInclude Include="MemoryDevice.h" />
     <ClInclude Include="MemoryMap.h" />
     <ClInclude Include="PSEmu.h" />

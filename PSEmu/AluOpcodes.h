@@ -1,43 +1,18 @@
 #pragma once
 #include <cstdint>
-struct comp_result {
-	uint32_t res;
-	uint32_t exc;
-	constexpr comp_result(uint32_t res) :res(res), exc(0) {}
-	constexpr comp_result(uint32_t res,uint32_t exc) :res(res), exc(exc) {}
-};
-struct instruction {
-	union { // 0-31
-		uint32_t raw;
-		struct {
-			unsigned int code : 6;
-			unsigned int p1 : 5;
-			unsigned int p2 : 5;
-			unsigned int p3 : 5;
-			unsigned int p4 : 5;
-			unsigned int xcode : 6;
-		};
-		struct {
-			unsigned int : 6;
-			unsigned int imm26 : 26;
-		};
-		struct {
-			unsigned int : 16;
-			unsigned int imm16 : 16;
-		};
-		struct {
-			unsigned int : 16;
-			unsigned int immi16 : 16;
-		};
-	};
-	uint32_t address;
-};
-static_assert(sizeof(instruction)== 8,"too big, packing wrong");
+#include "Instruction.h"
 
-struct Alu {
+struct AluOpcodes {
 	static comp_result alu_dispatch(instruction i, uint32_t rs, uint32_t rt) {
 		switch (i.code) {
-		case 0:		return alu_dispatch_special(i, rs, rt);
+		case 0x00:	return alu_dispatch_special(i, rs, rt);
+			//1 BcondZ
+			//2 J
+			//2 JAL
+			//4 BEQ
+			//5 BNE
+			//6 BLEZ
+			//7 BGTZ
 		case 0x08:	return Addi(i,rs,rt);
 		case 0x09:	return Addiu(i, rs, rt);
 		case 0x0a:	return Slti(i, rs, rt);
@@ -45,6 +20,12 @@ struct Alu {
 		case 0x0c:	return Andi(i, rs, rt);
 		case 0x0d:	return Ori(i, rs, rt);
 		case 0x0e:	return Xori(i, rs, rt);
+			//f LUI
+			//10-13 COP
+			//20-26 load
+			//28-2b,2e store
+			//30-33 load cop
+			//38-3b store cop
 		}
 		return reserved_instruction_exception;
 	}
@@ -61,6 +42,7 @@ struct Alu {
 			//c syscall
 			//d break
 			//10-13 mt/mf
+			//18-1b mult/div
 		case 0x20:	return Add(i, rs, rt);
 		case 0x21:	return Addu(i, rs, rt);
 		case 0x22:	return Sub(i, rs, rt);

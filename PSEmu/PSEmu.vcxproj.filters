@@ -59,7 +59,13 @@
     <ClInclude Include="Cop0.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Alu.h">
+    <ClInclude Include="AluOpcodes.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryOpcodes.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Instruction.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,7 +1,7 @@
 #pragma once
 #include <array>
-#include "Cpu.h"
 // Coprocessor 0 handles exception and irq
+class Cpu;
 class Cop0
 {
 	Cpu& cpu;
@@ -12,11 +12,11 @@ class Cop0
 	uint32_t r_bda, r_bdam;
 	uint32_t r_dcic;
 	//exception
-	const uint32_t eh_reset_addr = 0xBFC00000;
-	const uint32_t eh_rom_addr   = 0xBFC00100;
-	const uint32_t eh_ram_addr   = 0x80000000;
-	uint32_t r_badaddr;
-	uint32_t r_epc;
+	static const uint32_t eh_reset_addr = 0xBFC00000;
+	static const uint32_t eh_rom_addr   = 0xBFC00100;
+	static const uint32_t eh_ram_addr   = 0x80000000;
+	uint32_t r_badaddr{ 0 };
+	uint32_t r_epc{ 0 };
 	union {
 		uint32_t raw;
 		struct {
@@ -115,36 +115,7 @@ public:
                  0Ch Ov      Arithmetic overflow
                  0Dh-1Fh     Not used
 	*/
-	void raise_exception(uint32_t current_instruction_addr, uint8_t ExcCode, uint32_t param0)
-	{
-		r_sys.IEo = r_sys.IEp;
-		r_sys.KUo = r_sys.KUp;
-		r_sys.IEp = r_sys.IEc;
-		r_sys.KUp = r_sys.KUc;
-		//disable interrupt, go to kernel mode
-		r_sys.IEc = r_sys.IEp = false;
-		if (cpu.DebugGetPC() != current_instruction_addr) //if delay slot
-		{
-			r_cause.BD = true;
-			r_epc = current_instruction_addr - 4;
-		}
-		else
-		{
-			r_epc = current_instruction_addr;
-		}
-		switch (r_cause.excode = ExcCode)
-		{
-		case 11: // coprocessor unusable
-			r_cause.CE = param0;
-			break;
-		case 4: // address error (load/fetch)
-		case 5: // address error (store)
-			r_badaddr = param0;
-			break;
-		}
-		//jump to exception table
-		cpu.jump_to = (r_sys.BEV ? eh_rom_addr: eh_ram_addr)+0x80;
-
-	}
+	/// returns jump target
+	uint32_t raise_exception(uint32_t current_instruction_addr, uint8_t ExcCode, uint32_t param0);
 };
 
